@@ -1,1 +1,66 @@
-/* sidepanel.css - 自定义样式 */
+/* sidepanel.css */
+
+/* URL展开/收起动画 */
+.url-field {
+  position: relative;
+  min-height: 38px;
+}
+
+.url-field.expanded .url-preview {
+  display: none;
+}
+
+.url-field.expanded .url-full {
+  display: block;
+}
+
+.url-field .toggle-url svg {
+  transition: transform 0.2s;
+}
+
+.url-field.expanded .toggle-url svg {
+  transform: rotate(180deg);
+}
+
+/* 行截断 */
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Toast动画 */
+#toast {
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+#toast.hidden {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+#toast:not(.hidden) {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 错误提示 */
+.toast-error {
+  background-color: #dc2626 !important;
+}
+
+.toast-success {
+  background-color: #059669 !important;
+}
+
+/* 加载动画 */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
