@@ -101,24 +101,29 @@ async function extractContent() {
 
   try {
     const response = await chrome.runtime.sendMessage({ type: 'EXTRACT_CONTENT' });
+    console.log('Extract response:', response);
 
-    if (response.type === 'EXTRACT_RESULT') {
+    if (response && response.type === 'EXTRACT_RESULT') {
       currentData = {
         ...currentData,
         ...response.data
       };
       showContentForm();
       updateUI();
-    } else if (response.type === 'NEED_CONFIG') {
+    } else if (response && response.type === 'NEED_CONFIG') {
       currentDomain = response.domain;
       showConfigForm();
-    } else if (response.type === 'EXTRACT_FAILED') {
+    } else if (response && response.type === 'EXTRACT_FAILED') {
       showToast(response.error || '提取失败', 'error');
       showContentForm();
       updateUI();
+    } else {
+      showToast('未知响应类型', 'error');
+      hideLoading();
     }
   } catch (error) {
-    showToast('无法连接到页面', 'error');
+    console.error('Extract error:', error);
+    showToast('无法连接到页面: ' + error.message, 'error');
     hideLoading();
   }
 }
@@ -141,7 +146,10 @@ function updateUI() {
   elements.language.value = currentData.language;
 
   // 更新配音引擎
-  document.querySelector(`input[name="ttsEngine"][value="${currentData.ttsEngine}"]`).checked = true;
+  const ttsRadio = document.querySelector(`input[name="ttsEngine"][value="${currentData.ttsEngine}"]`);
+  if (ttsRadio) {
+    ttsRadio.checked = true;
+  }
 }
 
 function clearData() {
@@ -252,10 +260,17 @@ async function saveRule() {
 
 function showToast(message, type = 'info') {
   const toastDiv = elements.toast;
-  const toastContent = toastDiv.querySelector('div');
+  const toastContent = toastDiv.querySelector('.toast-content');
 
   toastContent.textContent = message;
-  toastContent.className = `${type === 'error' ? 'toast-error' : type === 'success' ? 'toast-success' : ''} text-white px-4 py-2 rounded shadow-lg text-sm`;
+
+  // 设置toast类型样式
+  toastDiv.classList.remove('toast-error', 'toast-success');
+  if (type === 'error') {
+    toastDiv.classList.add('toast-error');
+  } else if (type === 'success') {
+    toastDiv.classList.add('toast-success');
+  }
 
   toastDiv.classList.remove('hidden');
 

@@ -1,5 +1,7 @@
 // content/content.js - 页面内容提取脚本
 
+console.log('Content script loaded');
+
 function isKickstarterProject(url) {
   try {
     const urlObj = new URL(url);
@@ -21,21 +23,33 @@ function getDomain(url) {
 
 function extractVideoUrl(videoElement) {
   const sources = videoElement.querySelectorAll('source');
+  console.log('Found sources:', sources.length);
+
   if (sources.length === 0) return null;
 
   // 优先级1: _high.mp4
   const highMp4 = [...sources].find(s => s.src && s.src.endsWith('_high.mp4'));
-  if (highMp4) return highMp4.src;
+  if (highMp4) {
+    console.log('Found _high.mp4:', highMp4.src);
+    return highMp4.src;
+  }
 
   // 优先级2: .m3u8
   const m3u8 = [...sources].find(s => s.src && s.src.endsWith('.m3u8'));
-  if (m3u8) return m3u8.src;
+  if (m3u8) {
+    console.log('Found .m3u8:', m3u8.src);
+    return m3u8.src;
+  }
 
   // 优先级3: 第一个source
-  return sources[0].src || null;
+  const firstSrc = sources[0].src || null;
+  console.log('Using first source:', firstSrc);
+  return firstSrc;
 }
 
 function extractKickstarterContent() {
+  console.log('Extracting Kickstarter content...');
+
   const result = {
     pageUrl: window.location.href,
     pageTitle: document.title || '未命名',
@@ -45,20 +59,25 @@ function extractKickstarterContent() {
 
   // 提取视频: class="z1"的video标签
   const videoElement = document.querySelector('video.z1');
+  console.log('Video element (video.z1):', videoElement);
   if (videoElement) {
     result.videoUrl = extractVideoUrl(videoElement);
   }
 
   // 提取封面图: class="z3"的img标签
   const imgElement = document.querySelector('img.z3');
+  console.log('Image element (img.z3):', imgElement);
   if (imgElement) {
     result.imageUrl = imgElement.src || null;
   }
 
+  console.log('Extracted result:', result);
   return result;
 }
 
 function extractByRule(rule) {
+  console.log('Extracting by rule:', rule);
+
   const result = {
     pageUrl: window.location.href,
     pageTitle: document.title || '未命名',
@@ -70,33 +89,41 @@ function extractByRule(rule) {
   const videoSelector = rule.videoSelectorType === 'id'
     ? `video#${rule.videoSelectorValue}`
     : `video.${rule.videoSelectorValue}`;
+  console.log('Video selector:', videoSelector);
   const videoElement = document.querySelector(videoSelector);
   if (videoElement) {
     result.videoUrl = extractVideoUrl(videoElement);
   }
 
   // 提取封面图
-  const imageSelector = rule.imageSelectorType === 'id'
-    ? `img#${rule.imageSelectorValue}`
-    : `img.${rule.imageSelectorValue}`;
-  const imgElement = document.querySelector(imageSelector);
-  if (imgElement) {
-    result.imageUrl = imgElement.src || null;
+  if (rule.imageSelectorValue) {
+    const imageSelector = rule.imageSelectorType === 'id'
+      ? `img#${rule.imageSelectorValue}`
+      : `img.${rule.imageSelectorValue}`;
+    console.log('Image selector:', imageSelector);
+    const imgElement = document.querySelector(imageSelector);
+    if (imgElement) {
+      result.imageUrl = imgElement.src || null;
+    }
   }
 
+  console.log('Extracted result:', result);
   return result;
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  console.log('Content script received message:', message.type);
+
   if (message.type === 'EXTRACT_CONTENT') {
     handleExtractContent(sendResponse);
-    return true;
+    return true; // 保持消息通道开放
   }
 });
 
 async function handleExtractContent(sendResponse) {
   const url = window.location.href;
   const domain = getDomain(url);
+  console.log('Current URL:', url, 'Domain:', domain);
 
   // 检查是否为特殊页面
   if (url.startsWith('chrome://') || url.startsWith('chrome-extension://')) {
@@ -106,12 +133,14 @@ async function handleExtractContent(sendResponse) {
 
   // Kickstarter项目页使用内置规则
   if (isKickstarterProject(url)) {
+    console.log('Using Kickstarter built-in rules');
     const result = extractKickstarterContent();
     if (!result.videoUrl) {
       sendResponse({
         type: 'EXTRACT_FAILED',
         missing: ['videoUrl'],
-        error: '未找到主视频元素'
+        error: '未找到主视频元素',
+        data: result
       });
     } else {
       sendResponse({ type: 'EXTRACT_RESULT', data: result });
@@ -120,9 +149,11 @@ async function handleExtractContent(sendResponse) {
   }
 
   // 其他域名查询存储规则
+  console.log('Querying storage for domain rules...');
   const storageResult = await chrome.storage.local.get('domainRules');
   const rules = storageResult.domainRules || {};
   const rule = rules[domain];
+  console.log('Found rule for domain:', rule);
 
   if (rule) {
     const result = extractByRule(rule);
@@ -130,7 +161,8 @@ async function handleExtractContent(sendResponse) {
       sendResponse({
         type: 'EXTRACT_FAILED',
         missing: ['videoUrl'],
-        error: '未找到主视频元素'
+        error: '未找到主视频元素',
+        data: result
       });
     } else {
       sendResponse({ type: 'EXTRACT_RESULT', data: result });

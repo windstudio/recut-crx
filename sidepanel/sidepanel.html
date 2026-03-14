@@ -4,22 +4,301 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Recut CLI 指令生成</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="sidepanel.css">
+  <style>
+    /* 基础样式 */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #f9fafb;
+      min-height: 100vh;
+    }
+
+    .container {
+      padding: 16px;
+    }
+
+    /* 标题栏 */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .header h1 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1f2937;
+    }
+
+    .header-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      padding: 8px;
+      color: #6b7280;
+      border: none;
+      background: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .icon-btn:hover {
+      background-color: #f3f4f6;
+      color: #374151;
+    }
+
+    /* 表单样式 */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 4px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .form-select {
+      width: 80px;
+      padding: 8px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .form-select:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+    }
+
+    .form-input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .form-input:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+    }
+
+    /* URL字段 */
+    .url-field {
+      position: relative;
+      min-height: 38px;
+      background-color: #f3f4f6;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 14px;
+      color: #4b5563;
+      word-break: break-all;
+    }
+
+    .url-preview {
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .url-full {
+      display: none;
+    }
+
+    .url-field.expanded .url-preview {
+      display: none;
+    }
+
+    .url-field.expanded .url-full {
+      display: block;
+    }
+
+    .toggle-url {
+      float: right;
+      color: #3b82f6;
+      background: none;
+      border: none;
+      cursor: pointer;
+      margin-left: 8px;
+    }
+
+    .toggle-url:hover {
+      color: #1d4ed8;
+    }
+
+    .toggle-url svg {
+      transition: transform 0.2s;
+    }
+
+    .url-field.expanded .toggle-url svg {
+      transform: rotate(180deg);
+    }
+
+    /* Radio按钮 */
+    .radio-group {
+      display: flex;
+      gap: 16px;
+    }
+
+    .radio-label {
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .radio-label input {
+      margin-right: 8px;
+    }
+
+    /* 按钮 */
+    .btn {
+      width: 100%;
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .btn-primary {
+      background-color: #3b82f6;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: #2563eb;
+    }
+
+    .btn-secondary {
+      background-color: #e5e7eb;
+      color: #374151;
+    }
+
+    .btn-secondary:hover {
+      background-color: #d1d5db;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    /* 隐藏/显示 */
+    .hidden {
+      display: none !important;
+    }
+
+    /* 加载动画 */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px;
+    }
+
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid #e5e7eb;
+      border-bottom-color: #3b82f6;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 16px;
+      left: 16px;
+      right: 16px;
+      transition: opacity 0.3s, transform 0.3s;
+    }
+
+    .toast.hidden {
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events: none;
+    }
+
+    .toast-content {
+      background-color: #1f2937;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 6px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      font-size: 14px;
+    }
+
+    .toast-error .toast-content {
+      background-color: #dc2626;
+    }
+
+    .toast-success .toast-content {
+      background-color: #059669;
+    }
+
+    /* 配置表单 */
+    .config-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 8px;
+    }
+
+    .config-domain {
+      font-size: 14px;
+      color: #4b5563;
+      margin-bottom: 16px;
+    }
+
+    .config-domain span {
+      font-family: monospace;
+    }
+  </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
-  <div id="app" class="p-4">
+<body>
+  <div id="app" class="container">
     <!-- 标题栏 -->
-    <header class="flex items-center justify-between mb-4">
-      <h1 class="text-lg font-semibold text-gray-800">Recut CLI 指令生成</h1>
-      <div class="flex gap-2">
-        <button id="retryBtn" class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded" title="重试">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <header class="header">
+      <h1>Recut CLI 指令生成</h1>
+      <div class="header-buttons">
+        <button id="retryBtn" class="icon-btn" title="重试">
+          <svg class="w-5 h-5" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
         </button>
-        <button id="settingsBtn" class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded" title="设置">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button id="settingsBtn" class="icon-btn" title="设置">
+          <svg class="w-5 h-5" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
@@ -30,20 +309,20 @@
     <!-- 主内容区 -->
     <main id="mainContent">
       <!-- 加载状态 -->
-      <div id="loadingState" class="flex items-center justify-center py-8">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div id="loadingState" class="loading">
+        <div class="spinner"></div>
       </div>
 
       <!-- 内容表单 -->
-      <form id="contentForm" class="hidden space-y-4">
+      <form id="contentForm" class="hidden">
         <!-- 页面URL -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">页面URL</label>
-          <div class="url-field bg-gray-100 rounded px-3 py-2 text-sm text-gray-600 break-all">
-            <span class="url-preview line-clamp-1" id="pageUrlPreview"></span>
-            <span class="url-full hidden" id="pageUrlFull"></span>
-            <button type="button" class="toggle-url float-right text-blue-600 hover:text-blue-800 ml-2" data-target="pageUrl">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="form-group">
+          <label class="form-label">页面URL</label>
+          <div class="url-field">
+            <span class="url-preview" id="pageUrlPreview"></span>
+            <span class="url-full" id="pageUrlFull"></span>
+            <button type="button" class="toggle-url">
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
               </svg>
             </button>
@@ -51,25 +330,25 @@
         </div>
 
         <!-- 页面标题 -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">页面标题</label>
-          <div class="flex gap-2">
-            <select id="language" class="w-20 px-2 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <div class="form-group">
+          <label class="form-label">页面标题</label>
+          <div class="form-row">
+            <select id="language" class="form-select">
               <option value="english">英文</option>
               <option value="chinese">中文</option>
             </select>
-            <input type="text" id="pageTitle" class="flex-1 px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <input type="text" id="pageTitle" class="form-input">
           </div>
         </div>
 
         <!-- 主视频URL -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">主视频URL</label>
-          <div class="url-field bg-gray-100 rounded px-3 py-2 text-sm text-gray-600 break-all">
-            <span class="url-preview line-clamp-1" id="videoUrlPreview"></span>
-            <span class="url-full hidden" id="videoUrlFull"></span>
-            <button type="button" class="toggle-url float-right text-blue-600 hover:text-blue-800 ml-2" data-target="videoUrl">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="form-group">
+          <label class="form-label">主视频URL</label>
+          <div class="url-field">
+            <span class="url-preview" id="videoUrlPreview"></span>
+            <span class="url-full" id="videoUrlFull"></span>
+            <button type="button" class="toggle-url">
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
               </svg>
             </button>
@@ -77,13 +356,13 @@
         </div>
 
         <!-- 封面图URL -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">封面图URL</label>
-          <div class="url-field bg-gray-100 rounded px-3 py-2 text-sm text-gray-600 break-all">
-            <span class="url-preview line-clamp-1" id="imageUrlPreview"></span>
-            <span class="url-full hidden" id="imageUrlFull"></span>
-            <button type="button" class="toggle-url float-right text-blue-600 hover:text-blue-800 ml-2" data-target="imageUrl">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="form-group">
+          <label class="form-label">封面图URL</label>
+          <div class="url-field">
+            <span class="url-preview" id="imageUrlPreview"></span>
+            <span class="url-full" id="imageUrlFull"></span>
+            <button type="button" class="toggle-url">
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
               </svg>
             </button>
@@ -91,67 +370,63 @@
         </div>
 
         <!-- 配音引擎 -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">配音引擎</label>
-          <div class="flex gap-4">
-            <label class="flex items-center">
-              <input type="radio" name="ttsEngine" value="minimax" checked class="mr-2">
-              <span class="text-sm">minimax</span>
+        <div class="form-group">
+          <label class="form-label">配音引擎</label>
+          <div class="radio-group">
+            <label class="radio-label">
+              <input type="radio" name="ttsEngine" value="minimax" checked>
+              <span>minimax</span>
             </label>
-            <label class="flex items-center">
-              <input type="radio" name="ttsEngine" value="edge" class="mr-2">
-              <span class="text-sm">edge</span>
+            <label class="radio-label">
+              <input type="radio" name="ttsEngine" value="edge">
+              <span>edge</span>
             </label>
           </div>
         </div>
 
         <!-- 按钮 -->
-        <div class="space-y-2 pt-2">
-          <button type="button" id="copyBtn" class="w-full py-2 px-4 bg-blue-600 text-white font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-            复制指令
-          </button>
-          <button type="button" id="copySemiAutoBtn" class="w-full py-2 px-4 bg-gray-200 text-gray-700 font-medium rounded hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
-            复制半自动指令
-          </button>
+        <div class="btn-group">
+          <button type="button" id="copyBtn" class="btn btn-primary">复制指令</button>
+          <button type="button" id="copySemiAutoBtn" class="btn btn-secondary">复制半自动指令</button>
         </div>
       </form>
 
       <!-- 配置表单 -->
-      <form id="configForm" class="hidden space-y-4">
-        <h2 class="text-md font-semibold text-gray-800">规则配置</h2>
-        <p class="text-sm text-gray-600">当前域名: <span id="configDomain" class="font-mono"></span></p>
+      <form id="configForm" class="hidden">
+        <h2 class="config-title">规则配置</h2>
+        <p class="config-domain">当前域名: <span id="configDomain"></span></p>
 
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">视频标签</label>
-          <div class="flex gap-2">
-            <select id="videoSelectorType" class="w-20 px-2 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <div class="form-group">
+          <label class="form-label">视频标签</label>
+          <div class="form-row">
+            <select id="videoSelectorType" class="form-select">
               <option value="id">id</option>
               <option value="class">class</option>
             </select>
-            <input type="text" id="videoSelectorValue" class="flex-1 px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="如: z1">
+            <input type="text" id="videoSelectorValue" class="form-input" placeholder="如: z1">
           </div>
         </div>
 
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">封面图标签</label>
-          <div class="flex gap-2">
-            <select id="imageSelectorType" class="w-20 px-2 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <div class="form-group">
+          <label class="form-label">封面图标签</label>
+          <div class="form-row">
+            <select id="imageSelectorType" class="form-select">
               <option value="id">id</option>
               <option value="class">class</option>
             </select>
-            <input type="text" id="imageSelectorValue" class="flex-1 px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="如: z3">
+            <input type="text" id="imageSelectorValue" class="form-input" placeholder="如: z3">
           </div>
         </div>
 
-        <button type="submit" class="w-full py-2 px-4 bg-blue-600 text-white font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-          保存配置
-        </button>
+        <div class="btn-group">
+          <button type="submit" class="btn btn-primary">保存配置</button>
+        </div>
       </form>
     </main>
 
     <!-- Toast提示 -->
-    <div id="toast" class="fixed bottom-4 left-4 right-4 hidden">
-      <div class="bg-gray-800 text-white px-4 py-2 rounded shadow-lg text-sm"></div>
+    <div id="toast" class="toast hidden">
+      <div class="toast-content"></div>
     </div>
   </div>
 

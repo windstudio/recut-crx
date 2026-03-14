@@ -1,7 +1,7 @@
 // background/service-worker.js
 
 // 设置sidePanel在点击图标时打开
-chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
+chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(console.error);
 
 // 监听来自sidePanel和content script的消息
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -10,6 +10,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 async function handleMessage(message, sender, sendResponse) {
+  console.log('Received message:', message.type);
+
   switch (message.type) {
     case 'EXTRACT_CONTENT':
       await handleExtractContent(message, sendResponse);
@@ -28,14 +30,31 @@ async function handleMessage(message, sender, sendResponse) {
 async function handleExtractContent(message, sendResponse) {
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    console.log('Active tab:', tab);
+
     if (!tab) {
       sendResponse({ type: 'EXTRACT_FAILED', error: 'No active tab' });
       return;
     }
 
+    if (!tab.id) {
+      sendResponse({ type: 'EXTRACT_FAILED', error: 'Tab has no ID' });
+      return;
+    }
+
+    // 检查是否为特殊页面
+    if (tab.url && (tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://'))) {
+      sendResponse({ type: 'EXTRACT_FAILED', error: '无法访问此类型页面' });
+      return;
+    }
+
+    console.log('Sending message to tab:', tab.id);
+
     const response = await chrome.tabs.sendMessage(tab.id, { type: 'EXTRACT_CONTENT' });
+    console.log('Response from content script:', response);
     sendResponse(response);
   } catch (error) {
+    console.error('handleExtractContent error:', error);
     sendResponse({ type: 'EXTRACT_FAILED', error: error.message });
   }
 }
@@ -52,8 +71,10 @@ async function handleSaveRule(message, sendResponse) {
       imageSelectorValue
     };
     await chrome.storage.local.set({ domainRules: rules });
+    console.log('Rule saved:', domain, rules[domain]);
     sendResponse({ type: 'RULE_SAVED' });
   } catch (error) {
+    console.error('handleSaveRule error:', error);
     sendResponse({ error: error.message });
   }
 }
@@ -65,6 +86,7 @@ async function handleGetRule(message, sendResponse) {
     const rules = result.domainRules || {};
     sendResponse({ type: 'RULE_RESULT', rule: rules[domain] || null });
   } catch (error) {
+    console.error('handleGetRule error:', error);
     sendResponse({ error: error.message });
   }
 }
