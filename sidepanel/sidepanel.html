@@ -393,7 +393,14 @@
 
       <!-- 配置表单 -->
       <form id="configForm" class="hidden">
-        <h2 class="config-title">规则配置</h2>
+        <div style="display: flex; align-items: center; margin-bottom: 16px;">
+          <button type="button" id="backBtn" class="icon-btn" title="返回" style="margin-right: 8px;">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <h2 class="config-title" style="margin-bottom: 0;">规则配置</h2>
+        </div>
         <p class="config-domain">当前域名: <span id="configDomain"></span></p>
 
         <div class="form-group">

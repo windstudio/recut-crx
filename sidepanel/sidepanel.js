@@ -29,6 +29,7 @@ const elements = {
   copySemiAutoBtn: document.getElementById('copySemiAutoBtn'),
   retryBtn: document.getElementById('retryBtn'),
   settingsBtn: document.getElementById('settingsBtn'),
+  backBtn: document.getElementById('backBtn'),
   configDomain: document.getElementById('configDomain'),
   videoSelectorType: document.getElementById('videoSelectorType'),
   videoSelectorValue: document.getElementById('videoSelectorValue'),
@@ -53,6 +54,11 @@ function initEventListeners() {
   // 设置按钮
   elements.settingsBtn.addEventListener('click', () => {
     showConfigForm();
+  });
+
+  // 返回按钮
+  elements.backBtn.addEventListener('click', () => {
+    extractContent();
   });
 
   // 复制按钮
