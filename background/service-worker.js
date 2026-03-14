@@ -27,6 +27,20 @@ async function handleMessage(message, sender, sendResponse) {
   }
 }
 
+async function injectContentScript(tabId) {
+  try {
+    await chrome.scripting.executeScript({
+      target: { tabId: tabId },
+      files: ['content/content.js']
+    });
+    console.log('Content script injected successfully');
+    return true;
+  } catch (error) {
+    console.error('Failed to inject content script:', error);
+    return false;
+  }
+}
+
 async function handleExtractContent(message, sendResponse) {
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -43,16 +57,31 @@ async function handleExtractContent(message, sendResponse) {
     }
 
     // 检查是否为特殊页面
-    if (tab.url && (tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://'))) {
+    if (tab.url && (tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://') || tab.url.startsWith('edge://') || tab.url.startsWith('about:'))) {
       sendResponse({ type: 'EXTRACT_FAILED', error: '无法访问此类型页面' });
       return;
     }
 
     console.log('Sending message to tab:', tab.id);
 
-    const response = await chrome.tabs.sendMessage(tab.id, { type: 'EXTRACT_CONTENT' });
-    console.log('Response from content script:', response);
-    sendResponse(response);
+    // 尝试发送消息，如果失败则注入content script后重试
+    try {
+      const response = await chrome.tabs.sendMessage(tab.id, { type: 'EXTRACT_CONTENT' });
+      console.log('Response from content script:', response);
+      sendResponse(response);
+    } catch (error) {
+      console.log('Content script not found, injecting...');
+      const injected = await injectContentScript(tab.id);
+      if (injected) {
+        // 等待一下让脚本执行
+        await new Promise(resolve => setTimeout(resolve, 100));
+        const response = await chrome.tabs.sendMessage(tab.id, { type: 'EXTRACT_CONTENT' });
+        console.log('Response after injection:', response);
+        sendResponse(response);
+      } else {
+        sendResponse({ type: 'EXTRACT_FAILED', error: '无法注入内容脚本' });
+      }
+    }
   } catch (error) {
     console.error('handleExtractContent error:', error);
     sendResponse({ type: 'EXTRACT_FAILED', error: error.message });
