@@ -7,13 +7,19 @@
     "activeTab",
     "storage",
     "scripting",
-    "clipboardWrite"
+    "clipboardWrite",
+    "sidePanel"
   ],
   "host_permissions": [
     "<all_urls>"
   ],
   "action": {
-    "default_title": "打开Recut CLI生成器"
+    "default_title": "打开Recut CLI生成器",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
   },
   "side_panel": {
     "default_path": "sidepanel/sidepanel.html"

@@ -1,9 +1,7 @@
 // background/service-worker.js
 
-// 点击扩展图标时打开sidePanel
-chrome.action.onClicked.addListener((tab) => {
-  chrome.sidePanel.open({ tabId: tab.id });
-});
+// 设置sidePanel在点击图标时打开
+chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
 
 // 监听来自sidePanel和content script的消息
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
