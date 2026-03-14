@@ -1,1 +1,265 @@
 // sidepanel.js - 侧边栏逻辑
+
+// 状态
+let currentData = {
+  pageUrl: '',
+  pageTitle: '',
+  videoUrl: '',
+  imageUrl: '',
+  language: 'english',
+  ttsEngine: 'minimax'
+};
+
+let currentDomain = '';
+
+// DOM元素
+const elements = {
+  loadingState: document.getElementById('loadingState'),
+  contentForm: document.getElementById('contentForm'),
+  configForm: document.getElementById('configForm'),
+  pageUrlPreview: document.getElementById('pageUrlPreview'),
+  pageUrlFull: document.getElementById('pageUrlFull'),
+  pageTitle: document.getElementById('pageTitle'),
+  language: document.getElementById('language'),
+  videoUrlPreview: document.getElementById('videoUrlPreview'),
+  videoUrlFull: document.getElementById('videoUrlFull'),
+  imageUrlPreview: document.getElementById('imageUrlPreview'),
+  imageUrlFull: document.getElementById('imageUrlFull'),
+  copyBtn: document.getElementById('copyBtn'),
+  copySemiAutoBtn: document.getElementById('copySemiAutoBtn'),
+  retryBtn: document.getElementById('retryBtn'),
+  settingsBtn: document.getElementById('settingsBtn'),
+  configDomain: document.getElementById('configDomain'),
+  videoSelectorType: document.getElementById('videoSelectorType'),
+  videoSelectorValue: document.getElementById('videoSelectorValue'),
+  imageSelectorType: document.getElementById('imageSelectorType'),
+  imageSelectorValue: document.getElementById('imageSelectorValue'),
+  toast: document.getElementById('toast')
+};
+
+// 初始化
+document.addEventListener('DOMContentLoaded', () => {
+  initEventListeners();
+  extractContent();
+});
+
+function initEventListeners() {
+  // 重试按钮
+  elements.retryBtn.addEventListener('click', () => {
+    clearData();
+    extractContent();
+  });
+
+  // 设置按钮
+  elements.settingsBtn.addEventListener('click', () => {
+    showConfigForm();
+  });
+
+  // 复制按钮
+  elements.copyBtn.addEventListener('click', () => {
+    copyCommand(false);
+  });
+
+  elements.copySemiAutoBtn.addEventListener('click', () => {
+    copyCommand(true);
+  });
+
+  // URL展开/收起
+  document.querySelectorAll('.toggle-url').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const field = e.currentTarget.closest('.url-field');
+      field.classList.toggle('expanded');
+    });
+  });
+
+  // 配置表单提交
+  elements.configForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    await saveRule();
+  });
+
+  // 标题输入更新
+  elements.pageTitle.addEventListener('input', (e) => {
+    currentData.pageTitle = e.target.value;
+  });
+
+  // 语言选择更新
+  elements.language.addEventListener('change', (e) => {
+    currentData.language = e.target.value;
+  });
+
+  // 配音引擎更新
+  document.querySelectorAll('input[name="ttsEngine"]').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+      currentData.ttsEngine = e.target.value;
+    });
+  });
+}
+
+async function extractContent() {
+  showLoading();
+
+  try {
+    const response = await chrome.runtime.sendMessage({ type: 'EXTRACT_CONTENT' });
+
+    if (response.type === 'EXTRACT_RESULT') {
+      currentData = {
+        ...currentData,
+        ...response.data
+      };
+      showContentForm();
+      updateUI();
+    } else if (response.type === 'NEED_CONFIG') {
+      currentDomain = response.domain;
+      showConfigForm();
+    } else if (response.type === 'EXTRACT_FAILED') {
+      showToast(response.error || '提取失败', 'error');
+      showContentForm();
+      updateUI();
+    }
+  } catch (error) {
+    showToast('无法连接到页面', 'error');
+    hideLoading();
+  }
+}
+
+function updateUI() {
+  // 更新URL显示
+  elements.pageUrlPreview.textContent = currentData.pageUrl || '未获取';
+  elements.pageUrlFull.textContent = currentData.pageUrl || '未获取';
+
+  elements.videoUrlPreview.textContent = currentData.videoUrl || '未找到';
+  elements.videoUrlFull.textContent = currentData.videoUrl || '未找到';
+
+  elements.imageUrlPreview.textContent = currentData.imageUrl || '未找到';
+  elements.imageUrlFull.textContent = currentData.imageUrl || '未找到';
+
+  // 更新标题
+  elements.pageTitle.value = currentData.pageTitle || '';
+
+  // 更新语言
+  elements.language.value = currentData.language;
+
+  // 更新配音引擎
+  document.querySelector(`input[name="ttsEngine"][value="${currentData.ttsEngine}"]`).checked = true;
+}
+
+function clearData() {
+  currentData = {
+    pageUrl: '',
+    pageTitle: '',
+    videoUrl: '',
+    imageUrl: '',
+    language: 'english',
+    ttsEngine: 'minimax'
+  };
+}
+
+function showLoading() {
+  elements.loadingState.classList.remove('hidden');
+  elements.contentForm.classList.add('hidden');
+  elements.configForm.classList.add('hidden');
+}
+
+function hideLoading() {
+  elements.loadingState.classList.add('hidden');
+}
+
+function showContentForm() {
+  hideLoading();
+  elements.contentForm.classList.remove('hidden');
+  elements.configForm.classList.add('hidden');
+}
+
+function showConfigForm() {
+  hideLoading();
+  elements.contentForm.classList.add('hidden');
+  elements.configForm.classList.remove('hidden');
+  elements.configDomain.textContent = currentDomain || '未知';
+}
+
+function generateCommand(isSemiAuto = false) {
+  const { pageUrl, videoUrl, imageUrl, pageTitle, language, ttsEngine } = currentData;
+
+  if (!videoUrl) {
+    return null;
+  }
+
+  const titleFlag = language === 'chinese' ? '--chs-title' : '--title';
+  let cmd = `recut ${pageUrl} --video-url "${videoUrl}"`;
+
+  // imageUrl为空时不添加--image参数
+  if (imageUrl) {
+    cmd += ` --image "${imageUrl}"`;
+  }
+
+  cmd += ` ${titleFlag} "${pageTitle}" --tts-engine ${ttsEngine}`;
+
+  if (isSemiAuto) {
+    cmd += ' --pause-on-chs-script';
+  }
+
+  return cmd;
+}
+
+async function copyCommand(isSemiAuto) {
+  const cmd = generateCommand(isSemiAuto);
+
+  if (!cmd) {
+    showToast('未找到主视频URL，无法生成指令', 'error');
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(cmd);
+    showToast('指令已复制到剪贴板', 'success');
+  } catch (error) {
+    showToast('复制失败，请手动复制', 'error');
+  }
+}
+
+async function saveRule() {
+  const videoSelectorType = elements.videoSelectorType.value;
+  const videoSelectorValue = elements.videoSelectorValue.value.trim();
+  const imageSelectorType = elements.imageSelectorType.value;
+  const imageSelectorValue = elements.imageSelectorValue.value.trim();
+
+  if (!videoSelectorValue) {
+    showToast('请输入视频标签选择器', 'error');
+    return;
+  }
+
+  try {
+    await chrome.runtime.sendMessage({
+      type: 'SAVE_RULE',
+      domain: currentDomain,
+      videoSelectorType,
+      videoSelectorValue,
+      imageSelectorType,
+      imageSelectorValue
+    });
+
+    showToast('规则已保存', 'success');
+
+    // 重新提取内容
+    setTimeout(() => {
+      extractContent();
+    }, 500);
+  } catch (error) {
+    showToast('保存失败', 'error');
+  }
+}
+
+function showToast(message, type = 'info') {
+  const toastDiv = elements.toast;
+  const toastContent = toastDiv.querySelector('div');
+
+  toastContent.textContent = message;
+  toastContent.className = `${type === 'error' ? 'toast-error' : type === 'success' ? 'toast-success' : ''} text-white px-4 py-2 rounded shadow-lg text-sm`;
+
+  toastDiv.classList.remove('hidden');
+
+  setTimeout(() => {
+    toastDiv.classList.add('hidden');
+  }, 3000);
+}
