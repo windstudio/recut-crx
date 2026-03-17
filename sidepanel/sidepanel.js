@@ -6,8 +6,10 @@ let currentData = {
   pageTitle: '',
   videoUrl: '',
   imageUrl: '',
+  outputFile: '',
   language: 'english',
-  ttsEngine: 'minimax'
+  ttsEngine: 'minimax',
+  isKickstarter: false
 };
 
 let currentDomain = '';
@@ -25,6 +27,7 @@ const elements = {
   videoUrlFull: document.getElementById('videoUrlFull'),
   imageUrlPreview: document.getElementById('imageUrlPreview'),
   imageUrlFull: document.getElementById('imageUrlFull'),
+  outputFile: document.getElementById('outputFile'),
   copyBtn: document.getElementById('copyBtn'),
   copySemiAutoBtn: document.getElementById('copySemiAutoBtn'),
   retryBtn: document.getElementById('retryBtn'),
@@ -89,6 +92,11 @@ function initEventListeners() {
     currentData.pageTitle = e.target.value;
   });
 
+  // 目标文件名输入更新
+  elements.outputFile.addEventListener('input', (e) => {
+    currentData.outputFile = e.target.value;
+  });
+
   // 语言选择更新
   elements.language.addEventListener('change', (e) => {
     currentData.language = e.target.value;
@@ -100,6 +108,16 @@ function initEventListeners() {
       currentData.ttsEngine = e.target.value;
     });
   });
+}
+
+// 从URL提取域名
+function extractDomain(url) {
+  if (!url) return '';
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return '';
+  }
 }
 
 async function extractContent() {
@@ -114,6 +132,7 @@ async function extractContent() {
         ...currentData,
         ...response.data
       };
+      currentDomain = extractDomain(currentData.pageUrl);
       showContentForm();
       updateUI();
     } else if (response && response.type === 'NEED_CONFIG') {
@@ -121,6 +140,10 @@ async function extractContent() {
       showConfigForm();
     } else if (response && response.type === 'EXTRACT_FAILED') {
       showToast(response.error || '提取失败', 'error');
+      if (response.data) {
+        currentData = { ...currentData, ...response.data };
+        currentDomain = extractDomain(response.data.pageUrl);
+      }
       showContentForm();
       updateUI();
     } else {
@@ -148,6 +171,9 @@ function updateUI() {
   // 更新标题
   elements.pageTitle.value = currentData.pageTitle || '';
 
+  // 更新目标文件名
+  elements.outputFile.value = currentData.outputFile || '';
+
   // 更新语言
   elements.language.value = currentData.language;
 
@@ -164,8 +190,10 @@ function clearData() {
     pageTitle: '',
     videoUrl: '',
     imageUrl: '',
+    outputFile: '',
     language: 'english',
-    ttsEngine: 'minimax'
+    ttsEngine: 'minimax',
+    isKickstarter: false
   };
 }
 
@@ -190,17 +218,31 @@ function showConfigForm() {
   elements.contentForm.classList.add('hidden');
   elements.configForm.classList.remove('hidden');
   elements.configDomain.textContent = currentDomain || '未知';
+
+  // 如果是 kickstarter.com，预填充默认配置
+  const isKickstarter = currentDomain && currentDomain.includes('kickstarter.com');
+  elements.videoSelectorType.value = isKickstarter ? 'class' : 'id';
+  elements.videoSelectorValue.value = isKickstarter ? 'z1' : '';
+  elements.imageSelectorType.value = isKickstarter ? 'class' : 'id';
+  elements.imageSelectorValue.value = isKickstarter ? 'z3' : '';
 }
 
 function generateCommand(isSemiAuto = false) {
-  const { pageUrl, videoUrl, imageUrl, pageTitle, language, ttsEngine } = currentData;
+  const { pageUrl, videoUrl, imageUrl, pageTitle, outputFile, language, ttsEngine } = currentData;
 
   if (!videoUrl) {
     return null;
   }
 
   const titleFlag = language === 'chinese' ? '--chs-title' : '--title';
-  let cmd = `recut ${pageUrl} --video-url "${videoUrl}"`;
+  let cmd = `recut "${pageUrl}"`;
+
+  // 如果目标文件名不为空，添加 -o 参数（不加引号）
+  if (outputFile && outputFile.trim()) {
+    cmd += ` -o ${outputFile.trim()}`;
+  }
+
+  cmd += ` --video-url "${videoUrl}"`;
 
   // imageUrl为空时不添加--image参数
   if (imageUrl) {

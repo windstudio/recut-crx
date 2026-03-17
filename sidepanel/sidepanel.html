@@ -4,8 +4,86 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Recut CLI 指令生成</title>
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    /* 基础样式 */
+    /* ========================================
+       Design System Tokens
+       Pattern: Minimal Single Column
+       Style: Flat Design
+    ======================================== */
+    :root {
+      /* Colors - Trust Palette (Professional Blue) */
+      --color-primary: #2563EB;
+      --color-primary-hover: #1D4ED8;
+      --color-primary-light: #DBEAFE;
+      --color-secondary: #3B82F6;
+      --color-accent: #059669;
+      --color-accent-hover: #047857;
+      --color-background: #F8FAFC;
+      --color-surface: #FFFFFF;
+      --color-text: #0F172A;
+      --color-text-secondary: #64748B;
+      --color-text-muted: #94A3B8;
+      --color-border: #E4ECFC;
+      --color-border-focus: var(--color-primary);
+      --color-error: #DC2626;
+      --color-success: #059669;
+
+      /* Typography */
+      --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-size-xs: 12px;
+      --font-size-sm: 14px;
+      --font-size-base: 16px;
+      --font-size-lg: 18px;
+      --font-size-xl: 20px;
+      --font-weight-regular: 400;
+      --font-weight-medium: 500;
+      --font-weight-semibold: 600;
+      --font-weight-bold: 700;
+      --line-height: 1.5;
+
+      /* Spacing (8dp rhythm) */
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 20px;
+      --space-6: 24px;
+      --space-8: 32px;
+
+      /* Radius */
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+
+      /* Transitions */
+      --transition-fast: 150ms ease;
+      --transition-normal: 200ms ease;
+      --transition-slow: 300ms ease;
+
+      /* Shadows (minimal for flat design) */
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.05);
+      --shadow-focus: 0 0 0 3px var(--color-primary-light);
+    }
+
+    /* Reduced motion support */
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* ========================================
+       Base Styles
+    ======================================== */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -13,104 +91,189 @@
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background-color: #f9fafb;
+      font-family: var(--font-family);
+      font-size: var(--font-size-sm);
+      line-height: var(--line-height);
+      color: var(--color-text);
+      background-color: var(--color-background);
       min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
     .container {
-      padding: 16px;
+      padding: var(--space-4);
+      max-width: 100%;
     }
 
-    /* 标题栏 */
+    /* ========================================
+       Header
+    ======================================== */
     .header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 16px;
+      margin-bottom: var(--space-5);
+      padding-bottom: var(--space-4);
+      border-bottom: 1px solid var(--color-border);
     }
 
-    .header h1 {
-      font-size: 18px;
-      font-weight: 600;
-      color: #1f2937;
+    .header-title {
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text);
+      letter-spacing: -0.01em;
     }
 
-    .header-buttons {
+    .header-actions {
       display: flex;
-      gap: 8px;
+      gap: var(--space-2);
     }
 
+    /* ========================================
+       Icon Button
+    ======================================== */
     .icon-btn {
-      padding: 8px;
-      color: #6b7280;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      min-width: 44px;
+      min-height: 44px;
+      padding: var(--space-2);
+      color: var(--color-text-secondary);
+      background: transparent;
       border: none;
-      background: none;
-      border-radius: 6px;
+      border-radius: var(--radius-md);
       cursor: pointer;
+      transition: all var(--transition-fast);
     }
 
     .icon-btn:hover {
-      background-color: #f3f4f6;
-      color: #374151;
+      background-color: var(--color-primary-light);
+      color: var(--color-primary);
     }
 
-    /* 表单样式 */
+    .icon-btn:focus {
+      outline: none;
+      box-shadow: var(--shadow-focus);
+    }
+
+    .icon-btn:active {
+      transform: scale(0.95);
+    }
+
+    .icon-btn svg {
+      width: 20px;
+      height: 20px;
+      stroke-width: 2;
+    }
+
+    /* ========================================
+       Form Elements
+    ======================================== */
     .form-group {
-      margin-bottom: 16px;
+      margin-bottom: var(--space-4);
     }
 
     .form-label {
       display: block;
-      font-size: 14px;
-      font-weight: 500;
-      color: #374151;
-      margin-bottom: 4px;
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text);
+      margin-bottom: var(--space-2);
     }
 
     .form-row {
       display: flex;
-      gap: 8px;
+      gap: var(--space-2);
     }
 
+    /* Select */
     .form-select {
       width: 80px;
-      padding: 8px;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
-      font-size: 14px;
-      outline: none;
+      height: 44px;
+      padding: 0 var(--space-3);
+      font-family: var(--font-family);
+      font-size: var(--font-size-sm);
+      color: var(--color-text);
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%2364748B' viewBox='0 0 24 24'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      padding-right: 32px;
+    }
+
+    .form-select:hover {
+      border-color: var(--color-secondary);
     }
 
     .form-select:focus {
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: var(--shadow-focus);
     }
 
+    /* Input */
     .form-input {
       flex: 1;
-      padding: 8px 12px;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
-      font-size: 14px;
-      outline: none;
+      height: 44px;
+      padding: 0 var(--space-3);
+      font-family: var(--font-family);
+      font-size: var(--font-size-sm);
+      color: var(--color-text);
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      transition: all var(--transition-fast);
+    }
+
+    .form-input::placeholder {
+      color: var(--color-text-muted);
+    }
+
+    .form-input:hover {
+      border-color: var(--color-secondary);
     }
 
     .form-input:focus {
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: var(--shadow-focus);
     }
 
-    /* URL字段 */
+    /* ========================================
+       URL Field
+    ======================================== */
     .url-field {
       position: relative;
-      min-height: 38px;
-      background-color: #f3f4f6;
-      border-radius: 6px;
-      padding: 8px 12px;
-      font-size: 14px;
-      color: #4b5563;
+      display: flex;
+      align-items: flex-start;
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-3);
+      min-height: 44px;
+      transition: all var(--transition-fast);
+    }
+
+    .url-field:hover {
+      border-color: var(--color-secondary);
+    }
+
+    .url-preview,
+    .url-full {
+      flex: 1;
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
       word-break: break-all;
+      line-height: 1.4;
     }
 
     .url-preview {
@@ -118,10 +281,12 @@
       -webkit-line-clamp: 1;
       -webkit-box-orient: vertical;
       overflow: hidden;
+      min-width: 0;
     }
 
     .url-full {
       display: none;
+      min-width: 0;
     }
 
     .url-field.expanded .url-preview {
@@ -133,100 +298,158 @@
     }
 
     .toggle-url {
-      float: right;
-      color: #3b82f6;
-      background: none;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      margin-left: var(--space-2);
+      color: var(--color-primary);
+      background: var(--color-primary-light);
       border: none;
+      border-radius: var(--radius-sm);
       cursor: pointer;
-      margin-left: 8px;
+      transition: all var(--transition-fast);
     }
 
     .toggle-url:hover {
-      color: #1d4ed8;
+      background: var(--color-primary);
+      color: white;
+    }
+
+    .toggle-url:focus {
+      outline: none;
+      box-shadow: var(--shadow-focus);
     }
 
     .toggle-url svg {
-      transition: transform 0.2s;
+      width: 16px;
+      height: 16px;
+      transition: transform var(--transition-normal);
     }
 
     .url-field.expanded .toggle-url svg {
       transform: rotate(180deg);
     }
 
-    /* Radio按钮 */
+    /* ========================================
+       Radio Group (No border)
+    ======================================== */
+    .tts-group {
+      margin-bottom: var(--space-4);
+    }
+
+    .tts-label {
+      display: block;
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text);
+      margin-bottom: var(--space-2);
+    }
+
     .radio-group {
       display: flex;
-      gap: 16px;
+      gap: var(--space-5);
     }
 
     .radio-label {
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      font-size: 14px;
+      gap: var(--space-2);
+      font-size: var(--font-size-sm);
+      color: var(--color-text);
+      cursor: pointer;
+      padding: var(--space-2) 0;
+      min-height: 44px;
+    }
+
+    .radio-label input[type="radio"] {
+      width: 18px;
+      height: 18px;
+      margin: 0;
+      accent-color: var(--color-primary);
       cursor: pointer;
     }
 
-    .radio-label input {
-      margin-right: 8px;
+    .radio-label:hover {
+      color: var(--color-primary);
     }
 
-    /* 按钮 */
+    /* ========================================
+       Buttons
+    ======================================== */
     .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       width: 100%;
-      padding: 8px 16px;
-      font-size: 14px;
-      font-weight: 500;
+      height: 44px;
+      min-height: 44px;
+      padding: 0 var(--space-4);
+      font-family: var(--font-family);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
       border: none;
-      border-radius: 6px;
+      border-radius: var(--radius-md);
       cursor: pointer;
-      transition: background-color 0.2s;
+      transition: all var(--transition-fast);
+      letter-spacing: -0.01em;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn:focus {
+      outline: none;
+      box-shadow: var(--shadow-focus);
     }
 
     .btn-primary {
-      background-color: #3b82f6;
+      background-color: var(--color-primary);
       color: white;
     }
 
     .btn-primary:hover {
-      background-color: #2563eb;
+      background-color: var(--color-primary-hover);
     }
 
     .btn-secondary {
-      background-color: #e5e7eb;
-      color: #374151;
+      background-color: var(--color-background);
+      color: var(--color-text);
+      border: 1px solid var(--color-border);
     }
 
     .btn-secondary:hover {
-      background-color: #d1d5db;
+      background-color: var(--color-border);
+      border-color: var(--color-secondary);
     }
 
     .btn-group {
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      margin-top: 16px;
+      gap: var(--space-3);
+      margin-top: var(--space-5);
     }
 
-    /* 隐藏/显示 */
-    .hidden {
-      display: none !important;
-    }
-
-    /* 加载动画 */
+    /* ========================================
+       Loading State
+    ======================================== */
     .loading {
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 32px;
+      padding: var(--space-8);
     }
 
     .spinner {
       width: 32px;
       height: 32px;
-      border: 3px solid #e5e7eb;
-      border-bottom-color: #3b82f6;
+      border: 3px solid var(--color-border);
+      border-bottom-color: var(--color-primary);
       border-radius: 50%;
-      animation: spin 1s linear infinite;
+      animation: spin 0.8s linear infinite;
     }
 
     @keyframes spin {
@@ -235,13 +458,16 @@
       }
     }
 
-    /* Toast */
+    /* ========================================
+       Toast Notification
+    ======================================== */
     .toast {
       position: fixed;
-      bottom: 16px;
-      left: 16px;
-      right: 16px;
-      transition: opacity 0.3s, transform 0.3s;
+      bottom: var(--space-4);
+      left: var(--space-4);
+      right: var(--space-4);
+      z-index: 100;
+      transition: opacity var(--transition-normal), transform var(--transition-normal);
     }
 
     .toast.hidden {
@@ -251,54 +477,102 @@
     }
 
     .toast-content {
-      background-color: #1f2937;
+      background-color: var(--color-text);
       color: white;
-      padding: 8px 16px;
-      border-radius: 6px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      font-size: 14px;
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      text-align: center;
     }
 
     .toast-error .toast-content {
-      background-color: #dc2626;
+      background-color: var(--color-error);
     }
 
     .toast-success .toast-content {
-      background-color: #059669;
+      background-color: var(--color-success);
     }
 
-    /* 配置表单 */
+    /* ========================================
+       Config Form
+    ======================================== */
+    .config-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: var(--space-4);
+    }
+
+    .config-header .icon-btn {
+      margin-right: var(--space-2);
+    }
+
     .config-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: #1f2937;
-      margin-bottom: 8px;
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text);
     }
 
     .config-domain {
-      font-size: 14px;
-      color: #4b5563;
-      margin-bottom: 16px;
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-5);
+      padding: var(--space-3);
+      background: var(--color-primary-light);
+      border-radius: var(--radius-md);
     }
 
     .config-domain span {
-      font-family: monospace;
+      font-weight: var(--font-weight-medium);
+      color: var(--color-primary);
+    }
+
+    /* ========================================
+       Utility Classes
+    ======================================== */
+    .hidden {
+      display: none !important;
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* ========================================
+       Focus Visible (Keyboard Navigation)
+    ======================================== */
+    .icon-btn:focus-visible,
+    .btn:focus-visible,
+    .form-input:focus-visible,
+    .form-select:focus-visible,
+    .toggle-url:focus-visible {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 2px;
     }
   </style>
 </head>
 <body>
   <div id="app" class="container">
-    <!-- 标题栏 -->
+    <!-- Header -->
     <header class="header">
-      <h1>Recut CLI 指令生成</h1>
-      <div class="header-buttons">
-        <button id="retryBtn" class="icon-btn" title="重试">
-          <svg class="w-5 h-5" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <h1 class="header-title">Recut CLI</h1>
+      <div class="header-actions">
+        <button id="retryBtn" class="icon-btn" title="重试" aria-label="重试">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
         </button>
-        <button id="settingsBtn" class="icon-btn" title="设置">
-          <svg class="w-5 h-5" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button id="settingsBtn" class="icon-btn" title="设置" aria-label="设置">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
@@ -306,73 +580,81 @@
       </div>
     </header>
 
-    <!-- 主内容区 -->
+    <!-- Main Content -->
     <main id="mainContent">
-      <!-- 加载状态 -->
-      <div id="loadingState" class="loading">
-        <div class="spinner"></div>
+      <!-- Loading State -->
+      <div id="loadingState" class="loading" role="status" aria-live="polite">
+        <div class="spinner" aria-hidden="true"></div>
+        <span class="visually-hidden">加载中...</span>
       </div>
 
-      <!-- 内容表单 -->
+      <!-- Content Form -->
       <form id="contentForm" class="hidden">
-        <!-- 页面URL -->
+        <!-- Page URL -->
         <div class="form-group">
-          <label class="form-label">页面URL</label>
-          <div class="url-field">
+          <label class="form-label" for="pageUrlField">页面URL</label>
+          <div class="url-field" id="pageUrlField">
             <span class="url-preview" id="pageUrlPreview"></span>
             <span class="url-full" id="pageUrlFull"></span>
-            <button type="button" class="toggle-url">
-              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button type="button" class="toggle-url" aria-label="展开/收起URL">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
               </svg>
             </button>
           </div>
         </div>
 
-        <!-- 页面标题 -->
+        <!-- Page Title -->
         <div class="form-group">
-          <label class="form-label">页面标题</label>
+          <label class="form-label" for="pageTitle">页面标题</label>
           <div class="form-row">
-            <select id="language" class="form-select">
+            <label class="visually-hidden" for="language">语言选择</label>
+            <select id="language" class="form-select" aria-label="语言">
               <option value="english">英文</option>
               <option value="chinese">中文</option>
             </select>
-            <input type="text" id="pageTitle" class="form-input">
+            <input type="text" id="pageTitle" class="form-input" placeholder="输入标题">
           </div>
         </div>
 
-        <!-- 主视频URL -->
+        <!-- Video URL -->
         <div class="form-group">
-          <label class="form-label">主视频URL</label>
-          <div class="url-field">
+          <label class="form-label" for="videoUrlField">主视频URL</label>
+          <div class="url-field" id="videoUrlField">
             <span class="url-preview" id="videoUrlPreview"></span>
             <span class="url-full" id="videoUrlFull"></span>
-            <button type="button" class="toggle-url">
-              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button type="button" class="toggle-url" aria-label="展开/收起URL">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
               </svg>
             </button>
           </div>
         </div>
 
-        <!-- 封面图URL -->
+        <!-- Image URL -->
         <div class="form-group">
-          <label class="form-label">封面图URL</label>
-          <div class="url-field">
+          <label class="form-label" for="imageUrlField">封面图URL</label>
+          <div class="url-field" id="imageUrlField">
             <span class="url-preview" id="imageUrlPreview"></span>
             <span class="url-full" id="imageUrlFull"></span>
-            <button type="button" class="toggle-url">
-              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button type="button" class="toggle-url" aria-label="展开/收起URL">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
               </svg>
             </button>
           </div>
         </div>
 
-        <!-- 配音引擎 -->
+        <!-- Output File -->
         <div class="form-group">
-          <label class="form-label">配音引擎</label>
-          <div class="radio-group">
+          <label class="form-label" for="outputFile">目标文件名</label>
+          <input type="text" id="outputFile" class="form-input" style="width: 100%;" placeholder="输出文件名，如：video.mp4">
+        </div>
+
+        <!-- TTS Engine -->
+        <div class="tts-group">
+          <label class="tts-label">配音引擎</label>
+          <div class="radio-group" role="radiogroup" aria-label="配音引擎选择">
             <label class="radio-label">
               <input type="radio" name="ttsEngine" value="minimax" checked>
               <span>minimax</span>
@@ -384,29 +666,30 @@
           </div>
         </div>
 
-        <!-- 按钮 -->
+        <!-- Actions -->
         <div class="btn-group">
           <button type="button" id="copyBtn" class="btn btn-primary">复制指令</button>
           <button type="button" id="copySemiAutoBtn" class="btn btn-secondary">复制半自动指令</button>
         </div>
       </form>
 
-      <!-- 配置表单 -->
+      <!-- Config Form -->
       <form id="configForm" class="hidden">
-        <div style="display: flex; align-items: center; margin-bottom: 16px;">
-          <button type="button" id="backBtn" class="icon-btn" title="返回" style="margin-right: 8px;">
-            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="config-header">
+          <button type="button" id="backBtn" class="icon-btn" title="返回" aria-label="返回">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <h2 class="config-title" style="margin-bottom: 0;">规则配置</h2>
+          <h2 class="config-title">规则配置</h2>
         </div>
-        <p class="config-domain">当前域名: <span id="configDomain"></span></p>
+        <p class="config-domain">当前域名：<span id="configDomain"></span></p>
 
         <div class="form-group">
-          <label class="form-label">视频标签</label>
+          <label class="form-label" for="videoSelectorValue">主视频标签</label>
           <div class="form-row">
-            <select id="videoSelectorType" class="form-select">
+            <label class="visually-hidden" for="videoSelectorType">选择器类型</label>
+            <select id="videoSelectorType" class="form-select" aria-label="选择器类型">
               <option value="id">id</option>
               <option value="class">class</option>
             </select>
@@ -415,9 +698,10 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label">封面图标签</label>
+          <label class="form-label" for="imageSelectorValue">封面图标签</label>
           <div class="form-row">
-            <select id="imageSelectorType" class="form-select">
+            <label class="visually-hidden" for="imageSelectorType">选择器类型</label>
+            <select id="imageSelectorType" class="form-select" aria-label="选择器类型">
               <option value="id">id</option>
               <option value="class">class</option>
             </select>
@@ -431,8 +715,8 @@
       </form>
     </main>
 
-    <!-- Toast提示 -->
-    <div id="toast" class="toast hidden">
+    <!-- Toast -->
+    <div id="toast" class="toast hidden" role="alert" aria-live="polite">
       <div class="toast-content"></div>
     </div>
   </div>

@@ -47,14 +47,45 @@ function extractVideoUrl(videoElement) {
   return firstSrc;
 }
 
+function generateDefaultOutputFile(url) {
+  try {
+    const pathParts = new URL(url).pathname.split('/').filter(Boolean);
+    if (pathParts.length === 0) return '';
+    const lastPart = pathParts[pathParts.length - 1];
+    // 移除查询参数和锚点
+    const cleanName = lastPart.split(/[?#]/)[0];
+    return cleanName ? cleanName + '.mp4' : '';
+  } catch {
+    return '';
+  }
+}
+
+function getPageTitle() {
+  // 优先从 <h1> 获取标题
+  const h1 = document.querySelector('h1');
+  if (h1?.textContent?.trim()) {
+    return h1.textContent.trim();
+  }
+
+  // 回退到 <title>，移除已知的网站后缀
+  let title = document.title || '未命名';
+  // 移除 Kickstarter 后缀
+  if (title.endsWith(' — Kickstarter')) {
+    title = title.slice(0, -14);
+  }
+  return title.trim() || '未命名';
+}
+
 function extractKickstarterContent() {
   console.log('Extracting Kickstarter content...');
 
   const result = {
     pageUrl: window.location.href,
-    pageTitle: document.title || '未命名',
+    pageTitle: getPageTitle(),
     videoUrl: null,
-    imageUrl: null
+    imageUrl: null,
+    outputFile: generateDefaultOutputFile(window.location.href),
+    isKickstarter: true
   };
 
   // 提取视频: class="z1"的video标签
@@ -80,9 +111,11 @@ function extractByRule(rule) {
 
   const result = {
     pageUrl: window.location.href,
-    pageTitle: document.title || '未命名',
+    pageTitle: getPageTitle(),
     videoUrl: null,
-    imageUrl: null
+    imageUrl: null,
+    outputFile: generateDefaultOutputFile(window.location.href),
+    isKickstarter: false
   };
 
   // 提取视频
