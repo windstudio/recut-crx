@@ -8,8 +8,7 @@ let currentData = {
   imageUrl: '',
   outputFile: '',
   language: 'english',
-  ttsEngine: 'minimax',
-  isKickstarter: false
+  ttsEngine: 'minimax'
 };
 
 let currentDomain = '';
@@ -127,7 +126,6 @@ async function extractContent() {
 
   try {
     const response = await chrome.runtime.sendMessage({ type: 'EXTRACT_CONTENT' });
-    console.log('Extract response:', response);
 
     if (response && response.type === 'EXTRACT_RESULT') {
       currentData = {
@@ -194,8 +192,7 @@ function clearData() {
     imageUrl: '',
     outputFile: '',
     language: 'english',
-    ttsEngine: 'minimax',
-    isKickstarter: false
+    ttsEngine: 'minimax'
   };
 }
 

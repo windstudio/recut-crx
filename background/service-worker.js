@@ -10,17 +10,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 async function handleMessage(message, sender, sendResponse) {
-  console.log('Received message:', message.type);
-
   switch (message.type) {
     case 'EXTRACT_CONTENT':
       await handleExtractContent(message, sendResponse);
       break;
     case 'SAVE_RULE':
       await handleSaveRule(message, sendResponse);
-      break;
-    case 'GET_RULE':
-      await handleGetRule(message, sendResponse);
       break;
     default:
       sendResponse({ error: 'Unknown message type' });
@@ -33,7 +28,6 @@ async function injectContentScript(tabId) {
       target: { tabId: tabId },
       files: ['content/content.js']
     });
-    console.log('Content script injected successfully');
     return true;
   } catch (error) {
     console.error('Failed to inject content script:', error);
@@ -44,7 +38,6 @@ async function injectContentScript(tabId) {
 async function handleExtractContent(message, sendResponse) {
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    console.log('Active tab:', tab);
 
     if (!tab) {
       sendResponse({ type: 'EXTRACT_FAILED', error: 'No active tab' });
@@ -62,21 +55,16 @@ async function handleExtractContent(message, sendResponse) {
       return;
     }
 
-    console.log('Sending message to tab:', tab.id);
-
     // 尝试发送消息，如果失败则注入content script后重试
     try {
       const response = await chrome.tabs.sendMessage(tab.id, { type: 'EXTRACT_CONTENT' });
-      console.log('Response from content script:', response);
       sendResponse(response);
     } catch (error) {
-      console.log('Content script not found, injecting...');
       const injected = await injectContentScript(tab.id);
       if (injected) {
         // 等待一下让脚本执行
         await new Promise(resolve => setTimeout(resolve, 100));
         const response = await chrome.tabs.sendMessage(tab.id, { type: 'EXTRACT_CONTENT' });
-        console.log('Response after injection:', response);
         sendResponse(response);
       } else {
         sendResponse({ type: 'EXTRACT_FAILED', error: '无法注入内容脚本' });
@@ -100,22 +88,9 @@ async function handleSaveRule(message, sendResponse) {
       imageSelectorValue
     };
     await chrome.storage.local.set({ domainRules: rules });
-    console.log('Rule saved:', domain, rules[domain]);
     sendResponse({ type: 'RULE_SAVED' });
   } catch (error) {
     console.error('handleSaveRule error:', error);
-    sendResponse({ error: error.message });
-  }
-}
-
-async function handleGetRule(message, sendResponse) {
-  try {
-    const { domain } = message;
-    const result = await chrome.storage.local.get('domainRules');
-    const rules = result.domainRules || {};
-    sendResponse({ type: 'RULE_RESULT', rule: rules[domain] || null });
-  } catch (error) {
-    console.error('handleGetRule error:', error);
     sendResponse({ error: error.message });
   }
 }
