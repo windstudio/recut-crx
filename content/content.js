@@ -3,21 +3,10 @@
 function isKickstarterProject(url) {
   try {
     const urlObj = new URL(url);
-    const { hostname } = urlObj;
-    // 精确匹配主域或子域，避免误匹配 xkickstarter.com 之类
-    return (hostname === 'kickstarter.com' || hostname.endsWith('.kickstarter.com')) &&
-           urlObj.pathname.startsWith('/projects/');
+    return RECUT.isKickstarterHostname(urlObj.hostname) &&
+           urlObj.pathname.startsWith(RECUT.KICKSTARTER.PROJECT_PATH_PREFIX);
   } catch {
     return false;
-  }
-}
-
-function getDomain(url) {
-  try {
-    const urlObj = new URL(url);
-    return urlObj.hostname;
-  } catch {
-    return null;
   }
 }
 
@@ -80,14 +69,13 @@ function extractKickstarterContent() {
     outputFile: generateDefaultOutputFile(window.location.href)
   };
 
-  // 提取视频: class="z1"的video标签
-  const videoElement = document.querySelector('video.z1');
+  // 提取视频与封面图：选择器来自共享常量中的内置规则
+  const videoElement = document.querySelector(RECUT.KICKSTARTER.VIDEO_SELECTOR);
   if (videoElement) {
     result.videoUrl = extractVideoUrl(videoElement);
   }
 
-  // 提取封面图: class="z3"的img标签
-  const imgElement = document.querySelector('img.z3');
+  const imgElement = document.querySelector(RECUT.KICKSTARTER.IMAGE_SELECTOR);
   if (imgElement) {
     result.imageUrl = imgElement.src || null;
   }
@@ -136,7 +124,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 async function handleExtractContent(sendResponse) {
   const url = window.location.href;
-  const domain = getDomain(url);
+  const domain = RECUT.getDomain(url);
 
   // 检查是否为特殊页面
   if (RECUT.isSpecialUrl(url)) {

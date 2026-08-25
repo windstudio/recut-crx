@@ -111,15 +111,7 @@ function initEventListeners() {
   });
 }
 
-// 从URL提取域名
-function extractDomain(url) {
-  if (!url) return '';
-  try {
-    return new URL(url).hostname;
-  } catch {
-    return '';
-  }
-}
+// 从URL提取域名统一使用共享常量中的 RECUT.getDomain
 
 async function extractContent() {
   showLoading();
@@ -132,7 +124,7 @@ async function extractContent() {
         ...currentData,
         ...response.data
       };
-      currentDomain = extractDomain(currentData.pageUrl);
+      currentDomain = RECUT.getDomain(currentData.pageUrl);
       showContentForm();
       updateUI();
     } else if (response && response.type === RECUT.MSG.NEED_CONFIG) {
@@ -142,7 +134,7 @@ async function extractContent() {
       showToast(response.error || '提取失败', 'error');
       if (response.data) {
         currentData = { ...currentData, ...response.data };
-        currentDomain = extractDomain(response.data.pageUrl);
+        currentDomain = RECUT.getDomain(response.data.pageUrl);
       }
       showContentForm();
       updateUI();
@@ -218,12 +210,20 @@ function showConfigForm() {
   elements.configForm.classList.remove('hidden');
   elements.configDomain.textContent = currentDomain || '未知';
 
-  // 如果是 kickstarter.com，预填充默认配置
-  const isKickstarter = currentDomain && currentDomain.includes('kickstarter.com');
-  elements.videoSelectorType.value = isKickstarter ? 'class' : 'id';
-  elements.videoSelectorValue.value = isKickstarter ? 'z1' : '';
-  elements.imageSelectorType.value = isKickstarter ? 'class' : 'id';
-  elements.imageSelectorValue.value = isKickstarter ? 'z3' : '';
+  // kickstarter.com 预填内置规则（与 content 提取共用同一常量），其余留空待填
+  if (RECUT.isKickstarterHostname(currentDomain)) {
+    applyRuleToForm(RECUT.KICKSTARTER.DEFAULT_RULE);
+  } else {
+    applyRuleToForm(null);
+  }
+}
+
+// 把规则应用到配置表单；rule 为空时重置为空白表单
+function applyRuleToForm(rule) {
+  elements.videoSelectorType.value = rule?.videoSelectorType || 'id';
+  elements.videoSelectorValue.value = rule?.videoSelectorValue || '';
+  elements.imageSelectorType.value = rule?.imageSelectorType || 'id';
+  elements.imageSelectorValue.value = rule?.imageSelectorValue || '';
 }
 
 function generateCommand(isSemiAuto = false) {

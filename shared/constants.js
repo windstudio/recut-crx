@@ -36,10 +36,41 @@
     return SPECIAL_URL_PREFIXES.some((prefix) => url.startsWith(prefix));
   }
 
+  // Kickstarter 内置规则（唯一事实来源：content 提取与配置表单预填都从这里取）
+  const KICKSTARTER = Object.freeze({
+    HOST: 'kickstarter.com',
+    PROJECT_PATH_PREFIX: '/projects/',
+    VIDEO_SELECTOR: 'video.z1',
+    IMAGE_SELECTOR: 'img.z3',
+    DEFAULT_RULE: Object.freeze({
+      videoSelectorType: 'class',
+      videoSelectorValue: 'z1',
+      imageSelectorType: 'class',
+      imageSelectorValue: 'z3'
+    })
+  });
+
+  // 从 URL 提取域名，失败返回空串
+  function getDomain(url) {
+    try {
+      return new URL(url).hostname;
+    } catch {
+      return '';
+    }
+  }
+
+  // 主域或子域精确匹配，避免误匹配 xkickstarter.com 之类
+  function isKickstarterHostname(hostname) {
+    return hostname === KICKSTARTER.HOST || hostname.endsWith('.' + KICKSTARTER.HOST);
+  }
+
   global.RECUT = Object.freeze({
     MSG,
     STORAGE,
     SPECIAL_URL_PREFIXES,
-    isSpecialUrl
+    KICKSTARTER,
+    isSpecialUrl,
+    getDomain,
+    isKickstarterHostname
   });
 })(typeof globalThis !== 'undefined' ? globalThis : self);
