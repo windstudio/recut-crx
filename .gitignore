@@ -1,2 +1,12 @@
 # 文档目录
 docs/
+.scratch/
+
+# 发布产物与本地发布配置
+dist/
+.cws.env
+publish-cws.sh
+
+# 系统文件
+.DS_Store
+Thumbs.db
