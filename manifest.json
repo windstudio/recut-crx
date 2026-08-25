@@ -3,6 +3,7 @@
   "name": "Recut CLI 指令生成",
   "version": "1.0.0",
   "description": "从网页提取内容生成Recut CLI指令",
+  "homepage_url": "https://github.com/windstudio/recut-crx",
   "permissions": [
     "activeTab",
     "storage",
