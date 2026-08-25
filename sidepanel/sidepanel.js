@@ -204,14 +204,25 @@ function showContentForm() {
   elements.configForm.classList.add('hidden');
 }
 
-function showConfigForm() {
+async function showConfigForm() {
   hideLoading();
   elements.contentForm.classList.add('hidden');
   elements.configForm.classList.remove('hidden');
   elements.configDomain.textContent = currentDomain || '未知';
 
-  // kickstarter.com 预填内置规则（与 content 提取共用同一常量），其余留空待填
-  if (RECUT.isKickstarterHostname(currentDomain)) {
+  // 优先回显该域名已保存的规则；
+  // 无保存规则时 kickstarter.com 预填内置规则（与 content 提取共用同一常量），其余留空待填
+  let savedRule = null;
+  try {
+    const storage = await chrome.storage.local.get(RECUT.STORAGE.DOMAIN_RULES);
+    savedRule = (storage[RECUT.STORAGE.DOMAIN_RULES] || {})[currentDomain] || null;
+  } catch {
+    // 存储读取失败时按无已存规则处理
+  }
+
+  if (savedRule) {
+    applyRuleToForm(savedRule);
+  } else if (RECUT.isKickstarterHostname(currentDomain)) {
     applyRuleToForm(RECUT.KICKSTARTER.DEFAULT_RULE);
   } else {
     applyRuleToForm(null);
