@@ -128,7 +128,7 @@ function extractByRule(rule) {
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === 'EXTRACT_CONTENT') {
+  if (message.type === RECUT.MSG.EXTRACT_CONTENT) {
     handleExtractContent(sendResponse);
     return true; // 保持消息通道开放
   }
@@ -139,8 +139,8 @@ async function handleExtractContent(sendResponse) {
   const domain = getDomain(url);
 
   // 检查是否为特殊页面
-  if (url.startsWith('chrome://') || url.startsWith('chrome-extension://')) {
-    sendResponse({ type: 'EXTRACT_FAILED', error: '无法访问此类型页面' });
+  if (RECUT.isSpecialUrl(url)) {
+    sendResponse({ type: RECUT.MSG.EXTRACT_FAILED, error: '无法访问此类型页面' });
     return;
   }
 
@@ -152,15 +152,15 @@ async function handleExtractContent(sendResponse) {
   }
 
   // 其他域名查询存储规则
-  const storageResult = await chrome.storage.local.get('domainRules');
-  const rules = storageResult.domainRules || {};
+  const storageResult = await chrome.storage.local.get(RECUT.STORAGE.DOMAIN_RULES);
+  const rules = storageResult[RECUT.STORAGE.DOMAIN_RULES] || {};
   const rule = rules[domain];
 
   if (rule) {
     const result = extractByRule(rule);
     respondWithResult(sendResponse, result);
   } else {
-    sendResponse({ type: 'NEED_CONFIG', domain });
+    sendResponse({ type: RECUT.MSG.NEED_CONFIG, domain });
   }
 }
 
@@ -168,12 +168,12 @@ async function handleExtractContent(sendResponse) {
 function respondWithResult(sendResponse, result) {
   if (!result.videoUrl) {
     sendResponse({
-      type: 'EXTRACT_FAILED',
+      type: RECUT.MSG.EXTRACT_FAILED,
       missing: ['videoUrl'],
       error: '未找到主视频元素',
       data: result
     });
   } else {
-    sendResponse({ type: 'EXTRACT_RESULT', data: result });
+    sendResponse({ type: RECUT.MSG.EXTRACT_RESULT, data: result });
   }
 }

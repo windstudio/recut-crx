@@ -125,9 +125,9 @@ async function extractContent() {
   showLoading();
 
   try {
-    const response = await chrome.runtime.sendMessage({ type: 'EXTRACT_CONTENT' });
+    const response = await chrome.runtime.sendMessage({ type: RECUT.MSG.EXTRACT_CONTENT });
 
-    if (response && response.type === 'EXTRACT_RESULT') {
+    if (response && response.type === RECUT.MSG.EXTRACT_RESULT) {
       currentData = {
         ...currentData,
         ...response.data
@@ -135,10 +135,10 @@ async function extractContent() {
       currentDomain = extractDomain(currentData.pageUrl);
       showContentForm();
       updateUI();
-    } else if (response && response.type === 'NEED_CONFIG') {
+    } else if (response && response.type === RECUT.MSG.NEED_CONFIG) {
       currentDomain = response.domain;
       showConfigForm();
-    } else if (response && response.type === 'EXTRACT_FAILED') {
+    } else if (response && response.type === RECUT.MSG.EXTRACT_FAILED) {
       showToast(response.error || '提取失败', 'error');
       if (response.data) {
         currentData = { ...currentData, ...response.data };
@@ -286,7 +286,7 @@ async function saveRule() {
 
   try {
     await chrome.runtime.sendMessage({
-      type: 'SAVE_RULE',
+      type: RECUT.MSG.SAVE_RULE,
       domain: currentDomain,
       videoSelectorType,
       videoSelectorValue,
