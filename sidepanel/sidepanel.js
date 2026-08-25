@@ -59,9 +59,11 @@ function initEventListeners() {
     showConfigForm();
   });
 
-  // 返回按钮
+  // 返回按钮：回到主界面并展示已提取数据。
+  // 不能重新提取——否则未配置规则的域名会再次进入配置页形成死循环
   elements.backBtn.addEventListener('click', () => {
-    extractContent();
+    showContentForm();
+    updateUI();
   });
 
   // 复制按钮
