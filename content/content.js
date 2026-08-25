@@ -5,7 +5,9 @@ console.log('Content script loaded');
 function isKickstarterProject(url) {
   try {
     const urlObj = new URL(url);
-    return urlObj.hostname.endsWith('kickstarter.com') &&
+    const { hostname } = urlObj;
+    // 精确匹配主域或子域，避免误匹配 xkickstarter.com 之类
+    return (hostname === 'kickstarter.com' || hostname.endsWith('.kickstarter.com')) &&
            urlObj.pathname.startsWith('/projects/');
   } catch {
     return false;
