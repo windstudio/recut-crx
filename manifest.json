@@ -20,9 +20,9 @@
   "action": {
     "default_title": "打开Recut CLI生成器",
     "default_icon": {
-      "16": "icons/icon16.png",
-      "48": "icons/icon48.png",
-      "128": "icons/icon128.png"
+      "16": "icons/icon16-italic.png",
+      "48": "icons/icon48-italic.png",
+      "128": "icons/icon128-italic.png"
     }
   },
   "side_panel": {
@@ -39,8 +39,8 @@
     }
   ],
   "icons": {
-    "16": "icons/icon16.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
+    "16": "icons/icon16-italic.png",
+    "48": "icons/icon48-italic.png",
+    "128": "icons/icon128-italic.png"
   }
 }
