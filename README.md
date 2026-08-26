@@ -59,7 +59,7 @@ recut "<pageUrl>" [-o <outputFile>] --video-url "<videoUrl>" [--image "<imageUrl
 1. 用浏览器开发者工具找到目标页面的主视频与封面图元素
 2. 在配置表单中选择定位方式并填入对应值：
    - **主视频**：`<video>` 标签的 id 或 class
-   - **封面图**：`<img>` 标签的 id / class（取 `src`），或任意元素（如缩略图 `<div>`）的背景图 id / class（读取其 CSS `background-image`，相对路径自动还原为绝对地址）
+   - **封面图**：只需填标签的 id 或 class——程序优先查找对应 `<img>` 取其 `src`，找不到则读取该 id/class 元素的 CSS 背景图（`background-image`，相对路径自动还原为绝对地址），无需区分标签类型
 3. 保存后按域名生效，下次打开自动回显
 
 > Kickstarter 项目页内置规则为 `video.z1` / `img.z3`，无需配置。
@@ -130,7 +130,7 @@ For non-Kickstarter pages, the panel opens a config form on first use:
 1. Inspect the target page's main video and cover elements in DevTools
 2. Fill in the config form:
    - **Main video**: id or class of the `<video>` tag
-   - **Cover**: id/class of an `<img>` tag (uses its `src`), or the background-image id/class of any element such as a thumbnail `<div>` (reads its CSS `background-image`; relative URLs are resolved automatically)
+   - **Cover**: just the id or class — the extension first looks for a matching `<img>` and uses its `src`; if none is found, it reads the CSS background-image of the element with that id/class (relative URLs are resolved automatically)
 3. Rules apply per domain and are echoed back when reopened
 
 > Kickstarter project pages ship with built-in rules (`video.z1` / `img.z3`) — no configuration needed.

@@ -109,16 +109,18 @@ function extractByRule(rule) {
   return result;
 }
 
-// 按规则提取封面图：img id/class 取 <img> 的 src；
-// bg id/class 在任意元素（如缩略图 div）上取其 CSS 背景图
+// 按规则提取封面图：先查找 <img> 取其 src，找不到再从同 id/class 的任意元素
+// （如缩略图 div）的背景图获取，降低用户选择成本
 function extractImageUrlByRule(type, value) {
-  if (type === 'bg-id' || type === 'bg-class') {
-    const el = document.querySelector(type === 'bg-id' ? `#${value}` : `.${value}`);
-    return el ? extractBackgroundImageUrl(el) : null;
+  const sel = (type === 'id' ? '#' : '.') + value;
+
+  const imgElement = document.querySelector(`img${sel}`);
+  if (imgElement?.src) {
+    return imgElement.src;
   }
 
-  const imgElement = document.querySelector(type === 'id' ? `img#${value}` : `img.${value}`);
-  return imgElement?.src || null;
+  const el = document.querySelector(sel);
+  return el ? extractBackgroundImageUrl(el) : null;
 }
 
 // 解析元素的 background-image 为 URL（内联样式优先，兼容带引号写法），相对路径按页面地址还原
