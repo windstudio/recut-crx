@@ -10,6 +10,7 @@ dist/
 .cws.env
 publish-cws.sh
 
-# 系统文件
+# 系统文件与本地工具产物
 .DS_Store
 Thumbs.db
+.playwright-cli/
