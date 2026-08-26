@@ -4,6 +4,9 @@
   "version": "1.0.0",
   "description": "从网页提取内容生成Recut CLI指令",
   "homepage_url": "https://github.com/windstudio/recut-crx",
+  "author": {
+    "email": "windstudio@163.com"
+  },
   "permissions": [
     "activeTab",
     "storage",
