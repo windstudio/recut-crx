@@ -1,8 +1,12 @@
 # Recut CLI 指令生成 · Recut CLI Command Generator
 
-一个 Chrome 扩展（Manifest V3）：点击图标打开侧边栏，自动从当前网页提取主视频与封面图，编辑后一键生成并复制 [Recut CLI](https://github.com/windstudio/recut-crx) 指令。
+[Recut CLI](https://github.com/windstudio/recut-cli) 的配套工具：帮助你在浏览网页时获取视频信息、拼接生成 Recut CLI 的指令。
 
-A Chrome extension (Manifest V3): click the icon to open a side panel that auto-extracts the main video and cover image from the current page, then generates and copies a Recut CLI command with one click.
+Chrome 扩展（Manifest V3）——点击图标打开侧边栏，自动从当前网页提取主视频与封面图，编辑后一键生成并复制指令。
+
+A companion tool for [Recut CLI](https://github.com/windstudio/recut-cli): grab video info while browsing and assemble ready-to-run Recut CLI commands.
+
+A Chrome extension (Manifest V3) — click the icon to open a side panel that auto-extracts the main video and cover image from the current page, then generates and copies the command with one click.
 
 ---
 
@@ -17,7 +21,7 @@ A Chrome extension (Manifest V3): click the icon to open a side panel that auto-
 
 ## 📦 前置依赖
 
-- 本地已安装 `recut` 命令行工具（本扩展只负责生成并复制指令，实际处理由 CLI 完成）
+- 本地已安装 [Recut CLI](https://github.com/windstudio/recut-cli)（本扩展只负责生成并复制指令，实际处理由 CLI 完成）
 - Chrome / Edge 等支持 Manifest V3 Side Panel 的浏览器
 
 ## 🚀 安装（开发者模式）
@@ -58,7 +62,7 @@ recut "<pageUrl>" [-o <outputFile>] --video-url "<videoUrl>" [--image "<imageUrl
 
 ## 🖼 截图
 
-> TODO: 补充侧边栏提取成功态、规则配置页截图
+![Kickstarter 项目页提取示例：侧边栏自动填充页面URL、标题、主视频与封面图](screenshots/chrome-screenshot.png)
 
 ## 🧱 项目结构
 
@@ -97,7 +101,7 @@ A Chrome extension (Manifest V3): click the toolbar icon to open a side panel, a
 
 ### Prerequisites
 
-- The `recut` CLI installed locally — this extension only generates the command
+- The [Recut CLI](https://github.com/windstudio/recut-cli) installed locally — this extension only generates the command
 - A browser supporting Manifest V3 Side Panel (Chrome / Edge)
 
 ### Install (Developer Mode)
@@ -118,6 +122,10 @@ Then open `chrome://extensions`, enable **Developer mode**, click **Load unpacke
 ### Custom Site Rules
 
 For non-Kickstarter pages, the panel opens a config form on first use: inspect the target page's `<video>` and cover `<img>` tags in DevTools, enter their id or class (e.g. Kickstarter's `z1` / `z3`), and save — the rule is stored locally per domain.
+
+### Screenshot
+
+![Extracting from a Kickstarter project page](screenshots/chrome-screenshot.png)
 
 ### Privacy
 
