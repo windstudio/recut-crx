@@ -56,9 +56,13 @@ recut "<pageUrl>" [-o <outputFile>] --video-url "<videoUrl>" [--image "<imageUrl
 
 非 Kickstarter 页面首次提取时，会提示进入「规则配置」：
 
-1. 用浏览器开发者工具找到目标页面的主视频 `<video>` 与封面图 `<img>` 标签
-2. 在配置表单中选择标签的 id 或 class 并填入对应值（如 Kickstarter 的 `z1` / `z3`）
-3. 保存后按域名生效，下次打开自动应用
+1. 用浏览器开发者工具找到目标页面的主视频与封面图元素
+2. 在配置表单中选择定位方式并填入对应值：
+   - **主视频**：`<video>` 标签的 id 或 class
+   - **封面图**：`<img>` 标签的 id / class（取 `src`），或任意元素（如缩略图 `<div>`）的背景图 id / class（读取其 CSS `background-image`，相对路径自动还原为绝对地址）
+3. 保存后按域名生效，下次打开自动回显
+
+> Kickstarter 项目页内置规则为 `video.z1` / `img.z3`，无需配置。
 
 ## 🖼 截图
 
@@ -121,7 +125,15 @@ Then open `chrome://extensions`, enable **Developer mode**, click **Load unpacke
 
 ### Custom Site Rules
 
-For non-Kickstarter pages, the panel opens a config form on first use: inspect the target page's `<video>` and cover `<img>` tags in DevTools, enter their id or class (e.g. Kickstarter's `z1` / `z3`), and save — the rule is stored locally per domain.
+For non-Kickstarter pages, the panel opens a config form on first use:
+
+1. Inspect the target page's main video and cover elements in DevTools
+2. Fill in the config form:
+   - **Main video**: id or class of the `<video>` tag
+   - **Cover**: id/class of an `<img>` tag (uses its `src`), or the background-image id/class of any element such as a thumbnail `<div>` (reads its CSS `background-image`; relative URLs are resolved automatically)
+3. Rules apply per domain and are echoed back when reopened
+
+> Kickstarter project pages ship with built-in rules (`video.z1` / `img.z3`) — no configuration needed.
 
 ### Screenshot
 

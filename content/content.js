@@ -103,16 +103,36 @@ function extractByRule(rule) {
 
   // 提取封面图
   if (rule.imageSelectorValue) {
-    const imageSelector = rule.imageSelectorType === 'id'
-      ? `img#${rule.imageSelectorValue}`
-      : `img.${rule.imageSelectorValue}`;
-    const imgElement = document.querySelector(imageSelector);
-    if (imgElement) {
-      result.imageUrl = imgElement.src || null;
-    }
+    result.imageUrl = extractImageUrlByRule(rule.imageSelectorType, rule.imageSelectorValue);
   }
 
   return result;
+}
+
+// 按规则提取封面图：img id/class 取 <img> 的 src；
+// bg id/class 在任意元素（如缩略图 div）上取其 CSS 背景图
+function extractImageUrlByRule(type, value) {
+  if (type === 'bg-id' || type === 'bg-class') {
+    const el = document.querySelector(type === 'bg-id' ? `#${value}` : `.${value}`);
+    return el ? extractBackgroundImageUrl(el) : null;
+  }
+
+  const imgElement = document.querySelector(type === 'id' ? `img#${value}` : `img.${value}`);
+  return imgElement?.src || null;
+}
+
+// 解析元素的 background-image 为 URL（内联样式优先，兼容带引号写法），相对路径按页面地址还原
+function extractBackgroundImageUrl(el) {
+  const bg = el.style?.backgroundImage || getComputedStyle(el).backgroundImage || '';
+  const match = bg.match(/url\((['"]?)(.+?)\1\)/);
+  if (!match || !match[2] || match[2] === 'none') {
+    return null;
+  }
+  try {
+    return new URL(match[2], window.location.href).href;
+  } catch {
+    return match[2];
+  }
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
