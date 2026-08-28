@@ -516,6 +516,12 @@
       margin-bottom: var(--space-5);
     }
 
+    .config-hint {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+
     /* ========================================
        Utility Classes
     ======================================== */
@@ -671,7 +677,7 @@
           </button>
           <h2 class="config-title">规则配置</h2>
         </div>
-        <p class="config-domain">当前域名；<span id="configDomain"></span></p>
+        <p class="config-domain">当前域名：<span id="configDomain"></span></p>
 
         <div class="form-group">
           <label class="form-label" for="videoSelectorValue">主视频标签</label>
@@ -696,6 +702,9 @@
             <input type="text" id="imageSelectorValue" class="form-input" placeholder="如: z3">
           </div>
         </div>
+
+        <!-- 跨域说明 -->
+        <p class="config-hint">注：受浏览器同源策略限制，仅能提取当前页面主文档中的元素；跨域 iframe（如内嵌 YouTube 播放器）内的视频与封面图无法获取。</p>
 
         <div class="btn-group">
           <button type="submit" class="btn btn-primary">保存配置</button>
